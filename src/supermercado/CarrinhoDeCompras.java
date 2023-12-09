@@ -11,10 +11,10 @@ import java.util.Map;
 import static supermercado.EstoqueDeProdutos.estoque;
 
 public class CarrinhoDeCompras{
-    //private ArrayList<Produto> produtosCarrinho;
     private Map<String, List<Produto>> produtosCarrinho;
     private double valorCompra;
     
+    //@ pure
     public CarrinhoDeCompras(){
         produtosCarrinho = new LinkedHashMap<String, List<Produto>>();
         valorCompra = 0;
@@ -24,13 +24,23 @@ public class CarrinhoDeCompras{
         return this.produtosCarrinho;
     }
     
+    //@ public normal_behavior
+    //@ ensures \result == valorCompra
+    //@ pure 
     public double getValorCompra(){
         return this.valorCompra;
     }
     
+    //@ public 
+    //@ ensures this.valorCompra == valor
     public void setValorCompra(double valor){
         this.valorCompra = valor;
     }
+    
+    
+    //@ requires 0 < produto.getValor()
+    //@ requires 1 <= quantidade
+    //@ assignable produtosCarrinho
     
     public void addProduto(Produto produto, double quantidade){
         List<Produto> produtosDoCodigo;
@@ -56,8 +66,8 @@ public class CarrinhoDeCompras{
                 produtosCarrinho.put(codigo, produtosDoCodigo);
             }
             else{
-                System.out.println("ATENÃ‡ÃƒO\tATENÃ‡ÃƒO\tATENÃ‡ÃƒO\tATENÃ‡ÃƒO\tATENÃ‡ÃƒO");
-                System.out.println("Produto NÃƒO foi adicionado pois o codigo '" + produto.getCodigo() + "' possui apenas produtos '"
+                System.out.println("ATENÇÃOO\tATENÇÃO\tATENÇÃO\tATENÇÃO\tATENÇÃO");
+                System.out.println("Produto não foi adicionado pois o codigo '" + produto.getCodigo() + "' possui apenas produtos '"
                 +produtosDoCodigo.get(0).getNome() + "' e voce esta tentando adicionar '" + produto.getNome() + "'");
             }
         }else{
