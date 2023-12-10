@@ -11,37 +11,50 @@ import java.util.Map;
 import static supermercado.EstoqueDeProdutos.estoque;
 
 public class CarrinhoDeCompras{
+
+    //@ spec_public 
     private Map<String, List<Produto>> produtosCarrinho;
-    private double valorCompra;
+    private /*@ spec_public @*/ double valorCompra;
     
+    //@ ensures produtosCarrinho != null && valorCompra == 0.0;
+    //@ ensures produtosCarrinho instanceof LinkedHashMap;
     //@ pure
     public CarrinhoDeCompras(){
         produtosCarrinho = new LinkedHashMap<String, List<Produto>>();
         valorCompra = 0;
     }
     
+    //@ ensures \result != null;
+    //@ ensures \result.getClass() == LinkedHashMap.class;
+    //@ ensures \result.equals(produtosCarrinho);
     public Map getProdutosCarrinho(){
         return this.produtosCarrinho;
     }
     
-    //@ public normal_behavior
-    //@ ensures \result == valorCompra
-    //@ pure 
+    //@ ensures \result == valorCompra;
+    //@ ensures \result == valorCompra;
+    //@ ensures \result >= 0.0;
+    //@ pure
     public double getValorCompra(){
         return this.valorCompra;
     }
     
-    //@ public 
-    //@ ensures this.valorCompra == valor
+    //@ requires valor >= 0.0;
+    //@ assignable valorCompra;
+    //@ ensures valorCompra == valor;
     public void setValorCompra(double valor){
         this.valorCompra = valor;
     }
     
     
-    //@ requires 0 < produto.getValor()
-    //@ requires 1 <= quantidade
-    //@ assignable produtosCarrinho
-    
+    //@ requires produto != null;
+    //@ requires 0 < produto.getValor();
+    //@ requires 1 <= quantidade;
+    //@ assignable produtosCarrinho;
+    //@ ensures produtosCarrinho.containsKey(produto.getCodigo()) ?
+    //@ produtosCarrinho.get(produto.getCodigo()).contains(produto) :
+    //@ produtosCarrinho.get(produto.getCodigo()).size() == 1 &&
+    //@ produtosCarrinho.get(produto.getCodigo()).get(0).getNome().equals(produto.getNome());
     public void addProduto(Produto produto, double quantidade){
         List<Produto> produtosDoCodigo;
         String codigo = produto.getCodigo();
@@ -66,8 +79,8 @@ public class CarrinhoDeCompras{
                 produtosCarrinho.put(codigo, produtosDoCodigo);
             }
             else{
-                System.out.println("ATEN«√OO\tATEN«√O\tATEN«√O\tATEN«√O\tATEN«√O");
-                System.out.println("Produto n„o foi adicionado pois o codigo '" + produto.getCodigo() + "' possui apenas produtos '"
+                System.out.println("ATEN√á√ÉO\tATEN√á√ÉO\tATEN√á√ÉO\tATEN√á√ÉO\tATEN√á√ÉO");
+                System.out.println("Produto n√£o foi adicionado pois o codigo '" + produto.getCodigo() + "' possui apenas produtos '"
                 +produtosDoCodigo.get(0).getNome() + "' e voce esta tentando adicionar '" + produto.getNome() + "'");
             }
         }else{
@@ -88,16 +101,32 @@ public class CarrinhoDeCompras{
         }
     }
     
+    //@ requires produtosCarrinho != null;
+    //@ ensures produtosCarrinho.isEmpty();
+    //@ ensures (\forall String codigo; !produtosCarrinho.containsKey(codigo));
+    //@ ensures (\forall Produto produto_devolucao; 
+    //@          (\exists List produtos; produtosCarrinho.values().contains(produtos) &&
+    //@           produtos.contains(produto_devolucao)) ==> 
+    //@           ((produto_devolucao instanceof ProdutoUnitario ||
+    //@            (produto_devolucao instanceof ProdutoQuilo))));
+    //@ ensure produtosCarrinho.size() == 0;
     public void devolverProdutosCarrinho(){
         if(this.produtosCarrinho.size() > 0){
             String codigo;
             int quantidade;
-           Iterator it = produtosCarrinho.keySet().iterator();
-           while(it.hasNext()){
-               codigo = (String) it.next();
-               List produtos = produtosCarrinho.get(codigo);
-               quantidade = produtos.size();
-               Produto produto_devolucao = (Produto)produtos.get(0);
+            Iterator it = produtosCarrinho.keySet().iterator();
+
+            //@ loop_invariant produtosCarrinho.keySet().contains(codigo);
+            //@ loop_invariant quantidade >= 0;
+            //@ loop_invariant codigo != null;
+            //@ loop_invariant produtosCarrinho.get(codigo) != null;
+            //@ loop_invariant produtosCarrinho.get(codigo).size() >= 0;
+            //@ decreases produtosCarrinho.size();
+            while(it.hasNext()){
+                codigo = (String) it.next();
+                List produtos = produtosCarrinho.get(codigo);
+                quantidade = produtos.size();
+                Produto produto_devolucao = (Produto)produtos.get(0);
 
                 if(produto_devolucao instanceof ProdutoUnitario){
                     EstoqueDeProdutos.adicionarProduto(produto_devolucao, quantidade);
@@ -107,13 +136,15 @@ public class CarrinhoDeCompras{
                     double kilos = prodKg.getQtdQuilos();
                     EstoqueDeProdutos.adicionarProduto(prodKg, kilos);
                 }
-           }
-           this.produtosCarrinho.clear();
+            }
+            this.produtosCarrinho.clear();
             Utilitario.ImprimaMensagem("*   COMPRA CANCELADA, VOC√ä N√ÉO POSSUI MAIS PRODUTOS NO SEU CARRINHO!   *");
             exibirCarrinhoCliente();
         }
     }
     
+    //@ ensures produtosCarrinho != null;
+    //@ ensures (\forall String codigo; !produtosCarrinho.containsKey(codigo));
     public void exibirCarrinhoCliente(){
         Produto p = null;
         
@@ -151,32 +182,35 @@ public class CarrinhoDeCompras{
         Utilitario.Continuar();
     }
     
-    //Verifica se o carrinho de compras est√° vazio
+    //@ requires produtosCarrinho != null;
+    //@ ensures \result == (produtosCarrinho.size() > 0);
     public boolean verificaCarrinho(){
         return this.produtosCarrinho.size() > 0 ? true : false;
     }
     
-     public double calcularPrecoCarrinho(){
+    //@ requires produtosCarrinho != null;
+    //@ ensures \result >= 0;
+    public double calcularPrecoCarrinho(){
         
         // Calcular o valor total da compra usando o somatorio de:
         // - calcularValorPorItem
         // - calcularValorPorPeso
         // Calcular troco do cliente se pagar em $
-       double valorTotal = 0;
-       Iterator itMap = produtosCarrinho.keySet().iterator();
-       List<Produto> list;
-       int quantidade = 0;
-       double valorPeso = 0;
-       double ktdKilo = 0;
-       while(itMap.hasNext()){
-           String codigo = (String) itMap.next();
-           Iterator produtos = this.produtosCarrinho.get(codigo).iterator();
-           list = (List) produtosCarrinho.get(codigo);
+        double valorTotal = 0;
+        Iterator itMap = produtosCarrinho.keySet().iterator();
+        List<Produto> list;
+        int quantidade = 0;
+        double valorPeso = 0;
+        double ktdKilo = 0;
+        while(itMap.hasNext()){
+            String codigo = (String) itMap.next();
+            Iterator produtos = this.produtosCarrinho.get(codigo).iterator();
+            list = (List) produtosCarrinho.get(codigo);
            
-           while(produtos.hasNext()){
-               Produto produtoList = (Produto) produtos.next();
+            while(produtos.hasNext()){
+                Produto produtoList = (Produto) produtos.next();
 
-               //Fazer a variavel "valorTotal" receber o valor do calculo por kilo
+                //Fazer a variavel "valorTotal" receber o valor do calculo por kilo
                 if(produtoList instanceof ProdutoQuilo){
                     //Pega a quantidade de kilos e o valor do peso para que a balan√ßa possa calcular
                     ProdutoQuilo produtokg = (ProdutoQuilo) list.get(0);
@@ -195,7 +229,9 @@ public class CarrinhoDeCompras{
        }
        return valorTotal;
     }
-    
+
+    //@ ensures /result == this.valor    
+    //@ pure
     public double calcularValorCompra(){  
         return this.getValorCompra();
     }

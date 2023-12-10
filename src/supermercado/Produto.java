@@ -10,10 +10,14 @@ package supermercado;
  * @author Richiely Batista, Filipe Maciel
  */
 public abstract class Produto {	
+    
+    //@ public invariant this.nome != null;
+    //@ public invariant this.codigo != null;
+    //@ public invariant this.valor >=0;
     private /*@ spec_public @*/ String nome;
     private /*@ spec_public @*/ String codigo;
     private /*@ spec_public @*/ double valor;
-    
+
     //@ requires codigo != null && !codigo.isEmpty();
     //@ requires nome != null && !nome.isEmpty();
     //@ requires valor >= 0.0;
@@ -24,7 +28,6 @@ public abstract class Produto {
         this.codigo = codigo;
         this.valor = valor;
     }
-
 
     //@ requires nome != null && !nome.isEmpty();
     //@ assignable this.nome;

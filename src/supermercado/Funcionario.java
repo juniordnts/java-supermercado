@@ -10,10 +10,21 @@ package supermercado;
  * @author Richiely Batista, Filipe Maciel
  */
 public class Funcionario implements IOperacoesDoEstoque{
-    private String nome;
-    private String userName;
-    private String senha;
+    /*@
+      @ public invariant nome != null;
+      @ public invariant userName != null;
+      @ public invariant senha != null;
+    @*/
+    private /*@ spec_public @*/ String nome;
+    private /*@ spec_public @*/ String userName;
+    private /*@ spec_public @*/ String senha;
 
+
+    //@ requires nome != null && !nome.isEmpty();
+    //@ requires userName != null && !userName.isEmpty();
+    //@ requires senha != null && !senha.isEmpty();
+    //@ ensures this.nome.equals(nome) && this.userName.equals(userName) && this.senha.equals(senha);
+    //@ pure
     public Funcionario(String nome, String userName, String senha) {
         this.nome = nome;
         this.userName = userName;
