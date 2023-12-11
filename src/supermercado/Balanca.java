@@ -11,10 +11,20 @@ package supermercado;
  */
 public class Balanca{
     
+    //@ requires pesoDoProduto > 0;
+    //@ requires quantidade > 0;
+    //@ ensures \result == pesoDoProduto * quantidade;
+    //@ ensures \result >= 0.0;
+    //@ pure
     public static double calcularValorPorPeso(double pesoDoProduto, double quantidade){
         return pesoDoProduto*quantidade;
     }
     
+    //@ requires valorDoProduto > 0;
+    //@ requires quantidade > 0;
+    //@ ensures \result == valorDoProduto * quantidade;
+    //@ ensures \result >= 0.0;
+    //@ pure
     public static double calcularValorPorItem(double valorDoProduto, int quantidade){
         return valorDoProduto*quantidade;
     }
